@@ -1,10 +1,14 @@
 clear
-descriptors = zeros(129,0);
-features = struct;
+descriptors = zeros(128,0);
+features = struct([]);
 
-for i = 1:100 % objects in DB
+
+DB_PATH = '../coil-100/obj';
+N = 20;
+
+for i = 1:N% objects in DB
     for j = 0%:5:355 % object orientations
-        file = ['coil-100/obj' num2str(i) '__' num2str(j) '.png']; % read image
+        file = [DB_PATH num2str(i) '__' num2str(j) '.png']; % read image
 
         image = im2double(rgb2gray(imread(file)));
 
@@ -14,15 +18,16 @@ for i = 1:100 % objects in DB
         % to get the image shape take the keypoint, substract xLoc and
         % yLoc, multiply by xSize and ySize and rotate by -orientation
         for frame = frames
-            features(end + 1).xLoc = frame(1) - size(image,1)/2;
-            features(end + 1).yLoc = frame(2) - size(image,2)/2;
-            features(end + 1).xSize = size(image,1)/frame(4);
-            features(end + 1).ySize = size(image,2)/frame(4);
-            features(end + 1).orientation = frame(3);
-            features(end + 1).object = i;
+            ind = length(features) + 1;
+            features(ind).xLoc = frame(1) - size(image,1)/2;
+            features(ind).yLoc = frame(2) - size(image,2)/2;
+            features(ind).xSize = size(image,1)/frame(4);
+            features(ind).ySize = size(image,2)/frame(4);
+            features(ind).orientation = frame(3);
+            features(ind).object = i;
         end
     end
 end
 
 save('descriptors','descriptors');
-save('descr_features','descriptor_features');
+save('descr_features','features');

@@ -4,7 +4,7 @@ function [descriptor_indices, errors, desc_features] = matchAgainstDB(query_desc
     global descriptor_features
     
     % ANN search of descriptors in database
-    [results, distances] = flann_search(flann_index, single(query_descriptors), 1, flann_parameters);
+    [results, distances] = flann_search(flann_index, query_descriptors, 1, flann_parameters);
     
     passed = distances <= matching_error; % find out which descriptor is below the required matching error
     

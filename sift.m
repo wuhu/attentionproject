@@ -7,7 +7,8 @@ classdef sift
         ymax
     end
     methods
-        function obj = sift(image)
+        function obj = sift(imagepath)
+            image = imread(imagepath);
             image = im2double(rgb2gray(image));
             [obj.frames,obj.descriptors] = siftmex(image);
             [obj.ymax obj.xmax] = size(image);
