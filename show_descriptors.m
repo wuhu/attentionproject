@@ -1,5 +1,6 @@
 function foundobj = show_descriptors(frames, features, color)
     hold on
+    foundobj = [];
     if color == 'r'
         scatter(frames(1,:), frames(2,:),'MarkerFaceColor', 'r');
     else
