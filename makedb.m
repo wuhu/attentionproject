@@ -4,7 +4,7 @@ features = struct([]);
 
 
 DB_PATH = '../coil-100/obj';
-N = 20;
+N = 100;
 
 for i = 1:N% objects in DB
     for j = 0%:5:355 % object orientations

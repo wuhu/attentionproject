@@ -1,0 +1,7 @@
+function show_descriptors(frames, color)
+    hold on
+    for i = 1:length(frames(1,:))
+        scatter(frames(1,i),frames(2,i),'MarkerEdgeColor',['MarkerFaceColor',[1-color(i) 1-color(i) 1-color(i)]);
+    end
+    hold off
+end
