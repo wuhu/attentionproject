@@ -40,7 +40,7 @@ imshow(img)
 [upper_octaves_frames upper_octaves_descs] = imagedescs.get_descriptors_scales(3,100);
 [indices, dists, features] = matchAgainstDB(upper_octaves_descs, 0.5);
 foundobjs = [];
-foundobj = show_descriptors(upper_octaves_frames(:,indices),features, dists);
+foundobj = show_descriptors(upper_octaves_frames(:,indices),features, dists,'k');
 foundobjs(end+1:end+length(foundobj)) = foundobj;
 % while (...)
     % % compute UVAM
@@ -60,7 +60,7 @@ foundobjs(end+1:end+length(foundobj)) = foundobj;
         hold off
         [lower_octaves_frames lower_octaves_descs] = imagedescs.get_descriptors(ROI, 0, 3);
         [indices, dists, features] = matchAgainstDB(lower_octaves_descs, 0.3);
-        foundobj = show_descriptors(lower_octaves_frames(:,indices),features,dists);
+        foundobj = show_descriptors(lower_octaves_frames(:,indices),features,dists,'r');
         foundobjs(end+1:end+length(foundobj)) = foundobj;
         salMap(ROI(1):ROI(3),ROI(2):ROI(4)) = zeros(ROI(3)-ROI(1)+1,ROI(4)-ROI(2)+1);
     end

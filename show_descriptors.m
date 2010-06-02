@@ -1,4 +1,4 @@
-function foundobj = show_descriptors(frames, features, color)
+function foundobj = show_descriptors(frames, features, color, edgec)
     hold on
     foundobj = [];
     if color == 'r'
@@ -6,10 +6,10 @@ function foundobj = show_descriptors(frames, features, color)
     else
         for i = 1:length(frames(1,:))
             if color(i) < 0.1
-                text(frames(1,i),frames(2,i), num2str(features(i).object));
+                text(frames(1,i),frames(2,i), num2str(features(i).object), 'Color', edgec);
                 foundobj(end+1) = features(i).object;
             else
-                scatter(frames(1,i),frames(2,i),'MarkerEdgeColor','k', 'MarkerFaceColor',[max([1-color(i),0.1]), max([1-color(i),0.1]), max([1-color(i),0.1])]);
+                scatter(frames(1,i),frames(2,i),'MarkerEdgeColor',edgec, 'MarkerFaceColor',[max([1-color(i),0.1]), max([1-color(i),0.1]), max([1-color(i),0.1])]);
             end
         end
         
