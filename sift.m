@@ -13,7 +13,7 @@ classdef sift
             [obj.ymax obj.xmax] = size(image);
         end
         function [frames descriptors] = get_descriptors(obj, ROI, smin, smax)
-            i = obj.frames(1,:) > ROI(1) & obj.frames(1,:) < ROI(3) & obj.frames(2,:) > ROI(2) & obj.frames(2,:) < ROI(4) & obj.frames(3,:) >= smin & obj.frames(3,:) < smax;
+            i = obj.frames(1,:) > ROI(2) & obj.frames(1,:) < ROI(4) & obj.frames(2,:) > ROI(1) & obj.frames(2,:) < ROI(3) & obj.frames(3,:) >= smin & obj.frames(3,:) < smax;
             frames = obj.frames(:,i);
             descriptors = obj.descriptors(:,i);
         end

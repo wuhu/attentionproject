@@ -8,7 +8,7 @@
 %       ROI:  vector with upper-left and lower-rigth coordinates of 
 %             the region with the highest mean value [rowUL colUL rowLR colLR]
 
-function [ROI, maxi] = findROI(map, maxSize)
+function [ROI, max] = findROI(map, maxSize)
 
 % get size of the map
 [i,j] = size(map);
@@ -53,6 +53,6 @@ for block = 1:numbRegions
     end
     meanVal(block) = sum/(x*y);
 end
-maxi = max(meanVal);
+
 % return ROI 
-ROI = blockCoordinates(meanVal == maxi,:);
+ROI = blockCoordinates(find(meanVal == max(meanVal)),:);
