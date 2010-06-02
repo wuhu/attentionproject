@@ -15,6 +15,8 @@ function runUVAM(imagePath)
 close all
 clc
 
+init
+
 % % set path for saliency toolboy
 saliencyToolboxPath = '/home/hu/UNI/SIFT/SaliencyToolbox';
 addpath(genpath(saliencyToolboxPath));
