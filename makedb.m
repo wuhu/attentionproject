@@ -21,9 +21,9 @@ for i = 1:N% objects in DB
             ind = length(features) + 1;
             features(ind).xLoc = frame(1) - size(image,1)/2;
             features(ind).yLoc = frame(2) - size(image,2)/2;
-            features(ind).xSize = size(image,1)/frame(4);
-            features(ind).ySize = size(image,2)/frame(4);
-            features(ind).orientation = frame(3);
+            features(ind).xSize = size(image,1)/frame(3);
+            features(ind).ySize = size(image,2)/frame(3);
+            features(ind).orientation = frame(4);
             features(ind).object = i;
         end
     end

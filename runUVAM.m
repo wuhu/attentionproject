@@ -23,7 +23,7 @@ addpath(genpath(saliencyToolboxPath));
 
 % get input image
 img = imread(imagePath);
-
+imgr = zeros(size(img,1),size(img,2));%im2double(rgb2gray(img));
 % get saliency map
 salMap = getSalMap(img);
 figure(1)
@@ -38,10 +38,11 @@ imagedescs = sift(img);
 figure(2)
 imshow(img)
 [upper_octaves_frames upper_octaves_descs] = imagedescs.get_descriptors_scales(3,100);
-[indices, dists, features] = matchAgainstDB(upper_octaves_descs, 0.5);
+[indices, dists, features] = matchAgainstDB(upper_octaves_descs, 0.4);
 foundobjs = [];
 foundobj = show_descriptors(upper_octaves_frames(:,indices),features, dists,'k');
 foundobjs(end+1:end+length(foundobj)) = foundobj;
+ffap = mark_obj(imgr,features,upper_octaves_frames(:,indices),dists);
 % while (...)
     % % compute UVAM
     % if size(salMap) == size(famMap)
@@ -73,10 +74,14 @@ foundobjs(end+1:end+length(foundobj)) = foundobj;
         end
         done(end+1) = obj;
     end
+    figure
+    imshow(ffap);
+    
+    
     % % compute descriptors for ROI and FB map
     % famMap = getFBmap(getDescriptors(ROI))
 
-% end
+ end
 
 % % display maps
 % displayMap(img, salMap);

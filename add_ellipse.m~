@@ -1,0 +1,14 @@
+function map = add_ellipse(map,weight,x,y,xsize,ysize,rot)
+    N = max(xsize,ysize);
+    for i = x-N:x+N
+        for j = y-N:y+N
+            if i+x-N >0 && j + y-N > 0
+                if ((((i-(x-N)/2)*cosd(rot)-(j-(y-N)/2)*sind(rot)))^2)/xsize^2+((((j-(y-N)/2)*cosd(rot)+(i-(x-N)/2)*sind(rot)))^2)/ysize^2 <= 1
+                    map(i+x+N,j+y-N) = map(i+x-N,j+y-N) + weight;
+                else
+                    map(i+xN,j+y-N) = 1;
+                end
+            end
+        end
+    end
+end

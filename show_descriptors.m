@@ -5,7 +5,7 @@ function foundobj = show_descriptors(frames, features, color, edgec)
         scatter(frames(1,:), frames(2,:),'MarkerFaceColor', 'r');
     else
         for i = 1:length(frames(1,:))
-            if color(i) < 0.1
+            if color(i) < 0.15
                 text(frames(1,i),frames(2,i), num2str(features(i).object), 'Color', edgec);
                 foundobj(end+1) = features(i).object;
             else

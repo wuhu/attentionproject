@@ -15,6 +15,8 @@
 %     desc_features = descriptor_features(results); % features (size, orientation,.. relative to the object and object nr.)
 % end
 
+
+% vlfeat
 function [descriptor_indices, errors, desc_features] = matchAgainstDB(query_descriptors, matching_error)
     global descriptors1
     global descriptor_features
