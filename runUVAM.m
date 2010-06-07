@@ -54,15 +54,14 @@ ffap = mark_obj(imgr,features,upper_octaves_frames(:,indices),dists);
     
     while(maxi >= 0.1)
         [ROI maxi] = findROI(salMap, 16);
-        size(salMap)
-        size(img)
-        hold
+        hold on
         rectangle('Position',[ROI(2),ROI(1),ROI(4)-ROI(2)+1,ROI(3)-ROI(1)+1]);
         hold off
         [lower_octaves_frames lower_octaves_descs] = imagedescs.get_descriptors(ROI, 0, 3);
         [indices, dists, features] = matchAgainstDB(lower_octaves_descs, 0.3);
         foundobj = show_descriptors(lower_octaves_frames(:,indices),features,dists,'r');
         foundobjs(end+1:end+length(foundobj)) = foundobj;
+        %ffap = mark_obj(ffap,features,lower_octaves_frames(:,indices),dists);
         salMap(ROI(1):ROI(3),ROI(2):ROI(4)) = zeros(ROI(3)-ROI(1)+1,ROI(4)-ROI(2)+1);
     end
     done = [];
