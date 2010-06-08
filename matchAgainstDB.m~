@@ -20,12 +20,11 @@
 function [descriptor_indices, errors, desc_features] = matchAgainstDB(query_descriptors, matching_error)
     global descriptors1
     global descriptor_features
-    global desc_tree;
     
-    d = descriptors1;
+    d = descriptors1';
     
     % ANN search of descriptors in database
-    [results, distances] = vl_kdtreequery(desc_tree,d,query_descriptors);
+    [results, distances] = kNearestNeighbors(d,query_descriptors',1);
     results = results';
     distances = distances';
     passed = distances <= matching_error; % find out which descriptor is below the required matching error

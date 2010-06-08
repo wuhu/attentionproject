@@ -28,6 +28,7 @@ for i = 1:N% objects in DB
         end
     end
 end
-
+desctree = vl_kdtreebuild(descriptors);
+save('desctree','desctree')
 save('descriptors','descriptors');
 save('descr_features','features');

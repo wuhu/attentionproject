@@ -1,10 +1,11 @@
-function map = mark_obj(map, features,keyframe,dists)
-    for i = 1:length(features)
-        relscale =  keyframe(3,i) / features(i).scale;
-        yz = floor(keyframe(3,i) * features(i).ySize /2);
-        xz = floor(keyframe(3,i) * features(i).xSize /2);
-        xy = keyframe([1,2],i) - features(i).loc * relscale;
-        xyl = floor(rot2d(xy',keyframe([1,2],i)',-rad2deg(features(i).orientation-keyframe(4,i))));
-        map = add_ellipse(map,exp(-dists(i)^2 *5)/((keyframe(3,i)/2)^2*pi),xyl(1),xyl(2),xz,yz,0);
+function map = mark_obj(map,objects,found_dist)
+    for object = objects
+        if object.dist > found_dist && object.dist < 0.1
+            map = add_ellipse(map,exp(-object.dist^2 *5),object.loc(1),object.loc(2),object.xSize,object.ySize,0);
+        else
+            if object.dist < found_dist
+                map = add_ellipse_abs(map,-2,object.loc(1),object.loc(2),object.xSize,object.ySize,0);
+            end
+        end
     end
 end
