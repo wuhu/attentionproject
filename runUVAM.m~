@@ -61,22 +61,18 @@ ffap = mark_obj(imgr,features,upper_octaves_frames(:,indices),dists);
 
     % compute region of interest (ROI)
     maxi = 1;
-    count = 0;
+    c
     while(maxi >= MAXI_LIM)
-        count = count + 1;
         [ROI maxi] = findROI(salMap, ROI_SIZE);
         figure(2)
         hold on
         rectangle('Position',[ROI(2),ROI(1),ROI(4)-ROI(2)+1,ROI(3)-ROI(1)+1]);
         hold off
+        gazeSequence(img, ROI, maxi);
         [lower_octaves_frames lower_octaves_descs] = imagedescs.get_descriptors(ROI, 0, ROI_SCALES);
         [indices, dists, features] = matchAgainstDB(lower_octaves_descs, ERROR_LOWER_OCT);
         foundobj = show_descriptors(lower_octaves_frames(:,indices),features,dists,'r');
         foundobjs(end+1:end+length(foundobj)) = foundobj;
-        figure(3)
-        hold on
-        gazeSequence(img, ROI, count);
-        hold off
         %ffap = mark_obj(ffap,features,lower_octaves_frames(:,indices),dists);
         salMap(ROI(1):ROI(3),ROI(2):ROI(4)) = zeros(ROI(3)-ROI(1)+1,ROI(4)-ROI(2)+1);
     end

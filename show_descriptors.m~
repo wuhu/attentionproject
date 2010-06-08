@@ -2,7 +2,7 @@ function foundobj = show_descriptors(frames, features, color, edgec)
     hold on
     foundobj = [];
     if color == 'r'
-        scatter(frames(1,:), frames(2,:),'MarkerFaceColor', 'b');
+        scatter(frames(1,:), frames(2,:),'MarkerFaceColor', 'r');
     else
         for i = 1:length(frames(1,:))
             if color(i) < 0.1

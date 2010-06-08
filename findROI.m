@@ -39,7 +39,7 @@ for m = 1:x:i
     end
 end
 
-% coordinates of each block: [rowUL colUL rowLR colLR]
+% coordinates of each block: [colUL rowUL colLR rowLR]
 blockCoordinates = cat(2, begInd, endInd);
 
 % compute mean within each region
