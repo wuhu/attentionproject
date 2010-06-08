@@ -51,22 +51,27 @@ img = imread(imagePath);
 imgr = zeros(size(img,1),size(img,2)); % im2double(rgb2gray(img));
 
 % get and display saliency map
+time = cputime;
 salMap = getSalMap(img);
+salTime = cputime - time
 set(gcf,'CurrentAxes',hSaliency);
 image(salMap)
 colormap(gray(255))
 salMap = salMap/max(salMap(:));
 
 % SIFT image / get image descriptors
+time = cputime;
 imagedescs = sift(img);
-
+siftTime = cputime - time
 % get familiarity map
 % famMap = getFFmap(imagedescs);
 
 set(gcf,'CurrentAxes',hImage);
 imshow(img)
 [upper_octaves_frames upper_octaves_descs] = imagedescs.get_descriptors_scales(ROI_SCALES+1, 100);
+time = cputime;
 [indices, dists, features] = matchAgainstDB(upper_octaves_descs, ERROR_UPPER_OCT);
+FFtime = cputime - time
 passed_keypoints = upper_octaves_frames(:,indices);
 show_descriptors(passed_keypoints, dists,'k', FIND_DIST);
 objects = estimate_objects(features,passed_keypoints, dists);
@@ -83,6 +88,7 @@ UAmap = ffmap + salMap;
     % compute region of interest (ROI)
     maxi = 1;
     count = 0;
+    time = cputime;
     while(maxi >= MAXI_LIM)
         count = count + 1;
         [ROI maxi] = findROI(salMap, ROI_SIZE);
@@ -108,6 +114,7 @@ UAmap = ffmap + salMap;
         set(gcf,'CurrentAxes',hFamiliarity);
         imagesc(UAmap);
     end
+    FBtime = cputime - time
     figure(1)
     i = 0;
     found_objects = objects([objects.dist] < FIND_DIST);
