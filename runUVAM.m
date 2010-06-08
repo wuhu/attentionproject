@@ -17,11 +17,13 @@ clc
 
 init
 
-ERROR_UPPER_OCT = 0.3;  % threshold for detecting keypoint in upper octaves
-ERROR_LOWER_OCT = 0.3;  % threshold for detecting keypoint in lower octaves
+% set relevant parameters
+ERROR_UPPER_OCT = 0.5;  % threshold for detecting keypoint in upper octaves
+ERROR_LOWER_OCT = 0.25; % threshold for detecting keypoint in lower octaves
 ROI_SCALES      = 3;    % scales used within ROIs go from 0 to ROI_SCALES
 ROI_SIZE        = 32;   % size of a ROI in pixels
 MAXI_LIM        = 0.1;  % threshold of stopping for looking for next ROI
+FIND_DIST       = 0.1;  % if matching distance is <= FIND_DIST, object is marked as found
 
 % set path for saliency toolboy
 saliencyToolboxPath = '/home/hu/UNI/SIFT/SaliencyToolbox';
@@ -49,7 +51,7 @@ imshow(img)
 [upper_octaves_frames upper_octaves_descs] = imagedescs.get_descriptors_scales(ROI_SCALES+1, 100);
 [indices, dists, features] = matchAgainstDB(upper_octaves_descs, ERROR_UPPER_OCT);
 foundobjs = [];
-foundobj = show_descriptors(upper_octaves_frames(:,indices),features, dists,'k');
+foundobj = show_descriptors(upper_octaves_frames(:,indices),features, dists,'k', FIND_DIST);
 foundobjs(end+1:end+length(foundobj)) = foundobj;
 ffap = mark_obj(imgr,features,upper_octaves_frames(:,indices),dists);
 
@@ -71,7 +73,7 @@ ffap = mark_obj(imgr,features,upper_octaves_frames(:,indices),dists);
         hold off
         [lower_octaves_frames lower_octaves_descs] = imagedescs.get_descriptors(ROI, 0, ROI_SCALES);
         [indices, dists, features] = matchAgainstDB(lower_octaves_descs, ERROR_LOWER_OCT);
-        foundobj = show_descriptors(lower_octaves_frames(:,indices),features,dists,'r');
+        foundobj = show_descriptors(lower_octaves_frames(:,indices),features,dists,'r', FIND_DIST);
         foundobjs(end+1:end+length(foundobj)) = foundobj;
         figure(3)
         hold on
