@@ -12,6 +12,14 @@
 
 function runUVAM(imagePath)  
 
+% set relevant parameters
+ERROR_UPPER_OCT = 0.3;  % threshold for detecting keypoint in upper octaves
+ERROR_LOWER_OCT = 0.2; % threshold for detecting keypoint in lower octaves
+ROI_SCALES      = 3;    % scales used within ROIs go from 0 to ROI_SCALES
+ROI_SIZE        = 32;   % size of a ROI in pixels
+MAXI_LIM        = 0.1;  % threshold of stopping for looking for next ROI
+FIND_DIST       = 0.05;  % if matching distance is <= FIND_DIST, object is marked as found
+
 close all
 clc
 
@@ -34,13 +42,6 @@ hSaliency = axes('position',[0.7 0.05 0.25 0.425]);
 hFamiliarity = axes('position',[0.7 0.55 0.25 0.425]);
 %hUA = axes('position',[l2 b2 w h2]);
 
-% set relevant parameters
-ERROR_UPPER_OCT = 0.3;  % threshold for detecting keypoint in upper octaves
-ERROR_LOWER_OCT = 0.2; % threshold for detecting keypoint in lower octaves
-ROI_SCALES      = 3;    % scales used within ROIs go from 0 to ROI_SCALES
-ROI_SIZE        = 32;   % size of a ROI in pixels
-MAXI_LIM        = 0.1;  % threshold of stopping for looking for next ROI
-FIND_DIST       = 0.05;  % if matching distance is <= FIND_DIST, object is marked as found
 
 % set path for saliency toolboy
 saliencyToolboxPath = '/home/hu/UNI/SIFT/SaliencyToolbox';
@@ -103,6 +104,12 @@ UAmap = ffmap + salMap;
         new_objects = estimate_objects(features,passed_keypoints, dists);
         if(~isempty(new_objects))
             objects(end+1:end+length(new_objects)) = new_objects;
+        end
+        found_objects = objects([objects.dist] < FIND_DIST);
+        [~, m, ~] = unique([found_objects.label]);
+        found_objects = found_objects(m);
+        for obj = found_objects
+            salMap = add_ellipse_abs(salMap,-2,obj.loc(1),obj.loc(2),obj.xSize,obj.ySize,0);
         end
 %         figure(3)
 %         hold on
