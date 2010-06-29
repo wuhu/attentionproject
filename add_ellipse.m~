@@ -1,0 +1,12 @@
+function map = add_gauss(map,weight,y,x,ysize,xsize,rot)
+    N = max(xsize,ysize);
+    cosdrot = cosd(rot);
+    sindrot = sind(rot);
+    for i = 0:2*N
+        for j = 0:2*N
+            if ((((i-N)*cosdrot-(j-N)*sindrot))^2)/xsize^2+((((j-N)*cosdrot+(i-N)*sindrot))^2)/ysize^2 <= 1
+                map(i+x-N,j+y-N) = map(i+x-N,j+y-N) + weight * normpdf(;
+            end
+        end
+    end
+end
