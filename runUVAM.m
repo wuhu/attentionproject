@@ -24,7 +24,8 @@ function runUVAM(imagePath)
     close all
     clc
 
-    init % load database
+    init % load object database
+    run('vlfeat/toolbox/vl_setup.m'); % init vlfeat
 
     % setup figure
     figure(1); clf;
@@ -44,8 +45,8 @@ function runUVAM(imagePath)
     hFamiliarity = axes('position',[0.7 0.55 0.25 0.425]);
 
     % set path for saliency toolboy
-    saliencyToolboxPath = '/home/hu/UNI/SIFT/SaliencyToolbox';
-    addpath(genpath(saliencyToolboxPath));
+    %saliencyToolboxPath = '/home/hu/UNI/SIFT/SaliencyToolbox';
+    %addpath(genpath(saliencyToolboxPath));
 
     % get input image
     img = imread(imagePath);
@@ -88,17 +89,19 @@ function runUVAM(imagePath)
     %ffmap = mark_obj(imgr,objects,FIND_DIST);
     FFfmap = getFFfmap(objects, size(salMap));
     UAmap = FFfmap + salMap * 3;
-
+    
     maxi = 1;
     count = 0;
     time = cputime;
     found_objects = [];
+    [numbRegions, x, y, blockCoordinates] = possibleROIs(UAmap, ROI_SIZE);
+     
     while(maxi >= MAXI_LIM)
         count = count + 1;
         
         
         % find ROI on saliency map (change to UA map)
-        [ROI maxi] = findROI(UAmap, ROI_SIZE);
+        [ROI maxi] = findROI(numbRegions, x, y, blockCoordinates, UAmap);
         % display ROI on figure
         set(gcf,'CurrentAxes',hImage);
         hold on

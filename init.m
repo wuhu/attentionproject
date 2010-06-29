@@ -6,10 +6,11 @@ function init
     % [index, params] = makeflann(1:length(descriptors));
     % global flann_index
     % global flann_parameters
+    
     global descriptor_features
     global descriptors1
     global desc_tree
-     % 
+     
     % flann_index = index;
     % flann_parameters = params;
 
