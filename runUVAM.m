@@ -13,13 +13,12 @@
 function runUVAM(imagePath)  
 
     % set relevant parameters
-    ERROR_UPPER_OCT = 2;  % threshold for detecting keypoint in upper octaves
-    ERROR_LOWER_OCT = 2; % threshold for detecting keypoint in lower octaves
-    ROI_SCALES      = 3;    % scales used within ROIs go from 0 to ROI_SCALES
-    ROI_SIZE        = 32;   % size of a ROI in pixels
+    ERROR_UPPER_OCT = 2;     % threshold for detecting keypoint in upper octaves
+    ERROR_LOWER_OCT = 2;     % threshold for detecting keypoint in lower octaves
+    ROI_SCALES      = 3;     % scales used within ROIs go from 0 to ROI_SCALES
+    ROI_SIZE        = 32;    % size of a ROI in pixels
     MAXI_LIM        = 0.05;  % threshold of stopping for looking for next ROI
     FIND_DIST       = 0.05;  % if matching distance is <= FIND_DIST, object is marked as found
-
 
     close all
     clc

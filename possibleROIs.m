@@ -1,4 +1,4 @@
-% possibleROIs()
+% possibleROIs(...)
 %   Divides an input map into regions of size k-by-k 
 
 function [numbRegions, x, y, blockCoordinates] = possibleROIs(map, maxSize)
