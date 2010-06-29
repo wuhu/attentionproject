@@ -13,8 +13,8 @@
 function runUVAM(imagePath)  
 
     % set relevant parameters
-    ERROR_UPPER_OCT = 0.3;  % threshold for detecting keypoint in upper octaves
-    ERROR_LOWER_OCT = 0.2; % threshold for detecting keypoint in lower octaves
+    ERROR_UPPER_OCT = 2;  % threshold for detecting keypoint in upper octaves
+    ERROR_LOWER_OCT = 2; % threshold for detecting keypoint in lower octaves
     ROI_SCALES      = 3;    % scales used within ROIs go from 0 to ROI_SCALES
     ROI_SIZE        = 32;   % size of a ROI in pixels
     MAXI_LIM        = 0.1;  % threshold of stopping for looking for next ROI
@@ -33,8 +33,8 @@ function runUVAM(imagePath)
     set(gcf,'DefaultAxesbox','off')
     set(gcf,'DefaultAxesLayer','top')
     set(gcf,'DefaultAxesFontSize',10)
-    xSize = 30;
-    ySize = 25;
+    xSize = 25;
+    ySize = 15;
     xLeft = (21-xSize)/2;
     yTop = (30-ySize)/2;
     set(gcf,'PaperUnits','centimeters','PaperPosition',[xLeft yTop xSize ySize],'Position',[1000-xSize*30 700-ySize*30 xSize*40 ySize*40])
@@ -116,14 +116,18 @@ function runUVAM(imagePath)
         new_objects = estimate_objects(features,passed_keypoints, dists);
         % add new objects
        
-        interesting_objs = []
-        n_o_labels = [new_objects.label];
-        while ~isempty(n_o_labels)
-            old = objects([objects.label] == n_o_labels(1));
-            if size(old) > 0
-                interesting_objs = [interesting_objs, old,new_objects([new_objects.label] == n_o_labels(1))];
+        interesting_objs = [];
+        if ~isempty(new_objects)
+            n_o_labels = [new_objects.label];
+            while ~isempty(n_o_labels)
+                old = objects([objects.label] == n_o_labels(1));
+                if size(old) > 0
+                    new = new_objects([new_objects.label] == n_o_labels(1));
+                    [UAmap newly_found_objects] = getFBfmap(UAmap,[old, new]);
+                    found_objects = cat(1, found_objects, newly_found_objects);
+                end
+                n_o_labels(n_o_labels == n_o_labels(1)) = [];
             end
-            n_o_labels(n_o_labels == n_o_labels(1)) = [];
         end
         
         [UAmap newly_found_objects] = getFBfmap(UAmap,interesting_objs);
@@ -136,7 +140,7 @@ function runUVAM(imagePath)
 %         gazeSequence(img, ROI, count);
 %         hold off
         % inhibition of return at ROI location
-        UAmap(ROI(1):ROI(3),ROI(2):ROI(4)) = ones(ROI(3)-ROI(1)+1,ROI(4)-ROI(2)+1) * -2;
+        UAmap(ROI(1):ROI(3),ROI(2):ROI(4)) = ones(ROI(3)-ROI(1)+1,ROI(4)-ROI(2)+1) * -20;
         
         % update display of UA map
         figure(1)
@@ -149,7 +153,7 @@ function runUVAM(imagePath)
     
     % display found objects
     i = 0;
-    for obj = found_objects
+    for obj = found_objects'
        axes('position',[0.05+0.1*i 0.9 0.05 0.05]);
        imshow(['../coil-100/obj' num2str(obj.label) '__0.png'])
        title(['Object No. ' num2str(obj.label)])

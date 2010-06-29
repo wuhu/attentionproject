@@ -1,13 +1,13 @@
 function [FBfmap, found_objects] = getFBfmap(FBfmap, objects)
     %% Updates the Feed-Back Familiarity Map given in FBfmap with respect to
     %% keypoints given in objects
-    Qth = 0.25; 
+    Qth = 0.75; 
     found_objects =[];
     while ~isempty(objects)
         % Quality threshold
         
 
-        sigma_c = 0.25;
+        sigma_c = 0.1;
         
         current_o = [objects.label] == objects(1).label;
         
