@@ -13,6 +13,7 @@
 function runUVAM(imagePath)  
 
     % set relevant parameters
+
     ERROR_UPPER_OCT = 2;     % threshold for detecting keypoint in upper octaves
     ERROR_LOWER_OCT = 2;     % threshold for detecting keypoint in lower octaves
     ROI_SCALES      = 3;     % scales used within ROIs go from 0 to ROI_SCALES
@@ -87,8 +88,9 @@ function runUVAM(imagePath)
     % compute ffMap (needs to be improved)
     %ffmap = mark_obj(imgr,objects,FIND_DIST);
     FFfmap = getFFfmap(objects, size(salMap));
-    UAmap = FFfmap + salMap * 3;
-    
+
+    UAmap = FFfmap./2 + salMap;
+
     maxi = 1;
     count = 0;
     time = cputime;
@@ -127,6 +129,7 @@ function runUVAM(imagePath)
                     new = new_objects([new_objects.label] == n_o_labels(1));
                     [UAmap newly_found_objects] = getFBfmap(UAmap,[old, new]);
                     found_objects = cat(1, found_objects, newly_found_objects);
+                    
                 end
                 n_o_labels(n_o_labels == n_o_labels(1)) = [];
             end
@@ -142,7 +145,7 @@ function runUVAM(imagePath)
 %         gazeSequence(img, ROI, count);
 %         hold off
         % inhibition of return at ROI location
-        UAmap(ROI(1):ROI(3),ROI(2):ROI(4)) = ones(ROI(3)-ROI(1)+1,ROI(4)-ROI(2)+1) * -20;
+        UAmap(ROI(1):ROI(3),ROI(2):ROI(4)) = ones(ROI(3)-ROI(1)+1,ROI(4)-ROI(2)+1) * -2;
         
         % update display of UA map
         figure(1)
