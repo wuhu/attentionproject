@@ -13,6 +13,7 @@
 function runUVAM(imagePath)  
 
     % set relevant parameters
+
     ERROR_UPPER_OCT = 2;  % threshold for detecting keypoint in upper octaves
     ERROR_LOWER_OCT = 2; % threshold for detecting keypoint in lower octaves
     ROI_SCALES      = 3;    % scales used within ROIs go from 0 to ROI_SCALES
