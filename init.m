@@ -1,6 +1,6 @@
 function init
-    load descriptors
-    load descr_features
+    load descriptors_best
+    load descr_features_best
     load desctree
 
     % [index, params] = makeflann(1:length(descriptors));
