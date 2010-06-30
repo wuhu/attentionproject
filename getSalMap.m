@@ -9,7 +9,7 @@
 % runSaliency(inputImage)
 %    Uses defaultSaliencyParams as parameters.
 
-function map = getSalMap(inputImage,varargin)
+function map = getSalMap(inputImage,mapsize)
 
 
 % initialize the Image structure if necessary
@@ -23,11 +23,9 @@ end
 img = checkImageSize(img,'Prompt');
 
 % use the default saliency parameters if the user didn't specify any
-if isempty(varargin)
+
   params = defaultSaliencyParams(img.size,'dyadic');
-else
-  params = varargin{1};
-end
+
 
 % make sure that we don't use color features if we don't have a color image
 if (img.dims == 2)
@@ -38,5 +36,5 @@ end
 [salmap,salData] = makeSaliencyMap(img,params);
 
 map = salmap.data;
-map = imresize(map, salmap.origImage.size(1:2),'bilinear');
+map = imresize(map, mapsize,'bilinear');
 map = 255*mat2gray(map);

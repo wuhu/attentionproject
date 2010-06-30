@@ -1,7 +1,7 @@
-function [FBfmap, found_objects] = getFBfmap(FBfmap, objects)
+function [FBfmap, found_objects] = getFBfmap(FBfmap, objects, ratio)
     %% Updates the Feed-Back Familiarity Map given in FBfmap with respect to
     %% keypoints given in objects
-    Qth = 0.1; 
+    Qth = 0.2; 
     found_objects =[];
     while ~isempty(objects)
         % Quality threshold
@@ -27,13 +27,14 @@ function [FBfmap, found_objects] = getFBfmap(FBfmap, objects)
                     o = find(ida == cluster(1),1);
                     if cluster(2) > 2
                        % update the FBfmap with an -2, since the object has been found
-                       FBfmap = add_ellipse_abs(FBfmap, -2, objs(o).loc(1), objs(o).loc(2), objs(o).xSize, objs(o).ySize, 0);
+                       FBfmap = add_ellipse_abs(FBfmap, -2, ceil(objs(o).loc(1)/ratio(2)), ceil(objs(o).loc(2)/ratio(1)), ceil((objs(o).xSize)/ratio(2)), ceil((objs(o).ySize)/ratio(1)), 0);
                        found_objects = cat(1,found_objects,objs(o));
                     elseif cluster(2) == 2
                        % update the FBfmap with cluster Familiarity Value
                        oo = objs(ida == cluster(1));
                        dist = exp(-delta_dist(oo(1),oo(2))/(2 * sigma_c^2));
-                       FBfmap = add_ellipse(FBfmap, dist/5, objs(o).loc(1), objs(o).loc(2), ceil(objs(o).xSize/3), ceil(objs(o).ySize/3), 0);
+                       %FBfmap = add_gauss(FBfmap, dist, ceil(objs(o).loc(1)/ratio(2)), ceil(objs(o).loc(2)/ratio(1)), ceil((objs(o).xSize/3)/ratio(2)), ceil((objs(o).ySize/3)/ratio(1)), 0);
+                       FBfmap = add_gauss(FBfmap, dist, ceil(objs(o).loc(1)/ratio(2)), ceil(objs(o).loc(2)/ratio(1)), ceil((objs(o).xSize/3)/ratio(2)));
 
                     end
                     cluster = [idx(i), 1];

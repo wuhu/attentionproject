@@ -17,15 +17,16 @@ function runUVAM(imagePath)
     ERROR_LOWER_OCT = 2; % threshold for detecting keypoint in lower octaves
     ROI_SCALES      = 3;    % scales used within ROIs go from 0 to ROI_SCALES
     ROI_SIZE        = 32;   % size of a ROI in pixels
-    MAXI_LIM        = 0.09;  % threshold of stopping for looking for next ROI
+    MAXI_LIM        = 0.2;  % threshold of stopping for looking for next ROI
     FIND_DIST       = 0.05;  % if matching distance is <= FIND_DIST, object is marked as found
-
+    MAP_SIZE        = [100,100];
+    
 
     close all
     clc
 
     init % load object database
-    run('vlfeat/toolbox/vl_setup.m'); % init vlfeat
+    %run('vlfeat/toolbox/vl_setup.m'); % init vlfeat
 
     % setup figure
     figure(1); clf;
@@ -45,21 +46,27 @@ function runUVAM(imagePath)
     hFamiliarity = axes('position',[0.7 0.55 0.25 0.425]);
 
     % set path for saliency toolboy
-    %saliencyToolboxPath = '/home/hu/UNI/SIFT/SaliencyToolbox';
-    %addpath(genpath(saliencyToolboxPath));
+    saliencyToolboxPath = '/home/hu/UNI/SIFT/SaliencyToolbox';
+    addpath(genpath(saliencyToolboxPath));
 
     % get input image
     img = imread(imagePath);
 
     % get and display saliency map
     time = cputime;
-    salMap = getSalMap(img);
+    salMap = getSalMap(img, MAP_SIZE);
     salTime = cputime - time
     set(gcf,'CurrentAxes',hSaliency);
     image(salMap)
-    colormap(gray(255))
+    %colormap(gray(255))
     salMap = salMap/max(salMap(:));
+    
+    image_size = zeros(1,2);
+    image_size(1) = size(img,1);
+    image_size(2) = size(img,2);
 
+    ratio = image_size./MAP_SIZE;
+    
     % SIFT image / get image descriptors
     time = cputime;
     imagedescs = sift(img);
@@ -87,7 +94,7 @@ function runUVAM(imagePath)
     
     % compute ffMap (needs to be improved)
     %ffmap = mark_obj(imgr,objects,FIND_DIST);
-    FFfmap = getFFfmap(objects, size(salMap));
+    FFfmap = getFFfmap(objects, size(salMap),ratio);
 
     UAmap = FFfmap./2 + salMap;
 
@@ -95,7 +102,7 @@ function runUVAM(imagePath)
     count = 0;
     time = cputime;
     found_objects = [];
-    [numbRegions, x, y, blockCoordinates] = possibleROIs(UAmap, ROI_SIZE);
+    [numbRegions, x, y, blockCoordinates] = possibleROIs(UAmap, 5);
      
     while(maxi >= MAXI_LIM)
         count = count + 1;
@@ -103,15 +110,19 @@ function runUVAM(imagePath)
         
         % find ROI on saliency map (change to UA map)
         [ROI maxi] = findROI(numbRegions, x, y, blockCoordinates, UAmap);
+        ROI_big(1) = ROI(1,1) * ratio(1);
+        ROI_big(3) = ROI(1,3) * ratio(1);
+        ROI_big(2) = ROI(1,2) * ratio(2);
+        ROI_big(4) = ROI(1,4) * ratio(2);
         % display ROI on figure
         set(gcf,'CurrentAxes',hImage);
         hold on
-        rectangle('Position',[ROI(2),ROI(1),ROI(4)-ROI(2)+1,ROI(3)-ROI(1)+1]);
+        rectangle('Position',[ROI_big(2),ROI_big(1),ROI_big(4)-ROI_big(2)+1,ROI_big(3)-ROI_big(1)+1]);
         hold off
         
         
         % get descriptors from lower scale range inside current ROI
-        [lower_octaves_frames lower_octaves_descs] = imagedescs.get_descriptors(ROI, 0, ROI_SCALES);
+        [lower_octaves_frames lower_octaves_descs] = imagedescs.get_descriptors(ROI_big, 0, ROI_SCALES);
         % match descriptors against database
         [indices, dists, features] = matchAgainstDB(lower_octaves_descs, ERROR_LOWER_OCT);
         passed_keypoints = lower_octaves_frames(:,indices);
@@ -127,7 +138,7 @@ function runUVAM(imagePath)
                 old = objects([objects.label] == n_o_labels(1));
                 if size(old) > 0
                     new = new_objects([new_objects.label] == n_o_labels(1));
-                    [UAmap newly_found_objects] = getFBfmap(UAmap,[old, new]);
+                    [UAmap newly_found_objects] = getFBfmap(UAmap,[old, new],ratio);
                     found_objects = cat(1, found_objects, newly_found_objects);
                     
                 end
@@ -135,7 +146,7 @@ function runUVAM(imagePath)
             end
         end
         
-        [UAmap newly_found_objects] = getFBfmap(UAmap,interesting_objs);
+        [UAmap newly_found_objects] = getFBfmap(UAmap,interesting_objs,ratio);
         found_objects = cat(1, found_objects, newly_found_objects);
         
         objects = [objects,new_objects];
@@ -151,6 +162,7 @@ function runUVAM(imagePath)
         figure(1)
         set(gcf,'CurrentAxes',hFamiliarity);
         imagesc(UAmap);
+        maxi
     end
     FBtime = cputime - time
     figure(1)
