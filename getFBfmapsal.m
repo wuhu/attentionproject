@@ -1,7 +1,7 @@
-function [FBfmap, found_objects] = getFBfmapsal(FBfmap, objects, ratio)
+function [FBfmap, found_objects] = getFBfmapsal(FBfmap, objects, ratio, Qth)
     %% Updates the Feed-Back Familiarity Map given in FBfmap with respect to
     %% keypoints given in objects
-    Qth = 0.2; 
+    
     found_objects =[];
     while ~isempty(objects)
         % Quality threshold

@@ -18,16 +18,16 @@ function runUVAMsal(imagePath)
     ERROR_LOWER_OCT = 2; % threshold for detecting keypoint in lower octaves
     ROI_SCALES      = 3;    % scales used within ROIs go from 0 to ROI_SCALES
     ROI_SIZE        = 32;   % size of a ROI in pixels
-    MAXI_LIM        = 0.2;  % threshold of stopping for looking for next ROI
-    FIND_DIST       = 0.05;  % if matching distance is <= FIND_DIST, object is marked as found
-    MAP_SIZE        = [100,100];
+    MAXI_LIM        = 0.05;  % threshold of stopping for looking for next ROI
+    FIND_DIST       = 0.3;  % if matching distance is <= FIND_DIST, object is marked as found
+    MAP_SIZE        = [576, 768];
     
 
     close all
     clc
 
     init % load object database
-    %run('vlfeat/toolbox/vl_setup.m'); % init vlfeat
+    run('vlfeat/toolbox/vl_setup.m'); % init vlfeat
 
     % setup figure
     figure(1); clf;
@@ -59,7 +59,7 @@ function runUVAMsal(imagePath)
     salTime = cputime - time
     set(gcf,'CurrentAxes',hSaliency);
     image(salMap)
-    %colormap(gray(255))
+    colormap(gray(255))
     salMap = salMap/max(salMap(:));
     
     image_size = zeros(1,2);
@@ -104,11 +104,10 @@ function runUVAMsal(imagePath)
     time = cputime;
     found_objects = [];
     objects = [];
-    [numbRegions, x, y, blockCoordinates] = possibleROIs(salMap, 5);
+    [numbRegions, x, y, blockCoordinates] = possibleROIs(salMap, ROI_SIZE);
      
     while(maxi >= MAXI_LIM)
         count = count + 1;
-        
         
         % find ROI on saliency map (change to UA map)
         [ROI maxi] = findROI(numbRegions, x, y, blockCoordinates, salMap);
@@ -116,12 +115,12 @@ function runUVAMsal(imagePath)
         ROI_big(3) = ROI(1,3) * ratio(1);
         ROI_big(2) = ROI(1,2) * ratio(2);
         ROI_big(4) = ROI(1,4) * ratio(2);
+        
         % display ROI on figure
         set(gcf,'CurrentAxes',hImage);
         hold on
         rectangle('Position',[ROI_big(2),ROI_big(1),ROI_big(4)-ROI_big(2)+1,ROI_big(3)-ROI_big(1)+1]);
         hold off
-        
         
         % get descriptors from lower scale range inside current ROI
         [lower_octaves_frames lower_octaves_descs] = imagedescs.get_descriptors(ROI_big, 0, 1000);
@@ -142,7 +141,7 @@ function runUVAMsal(imagePath)
                 old = objects([objects.label] == n_o_labels(1));
                 if size(old) > 0
                     new = new_objects([new_objects.label] == n_o_labels(1));
-                    [salMap newly_found_objects] = getFBfmapsal(UAmap,[old, new],ratio);
+                    [salMap newly_found_objects] = getFBfmapsal(salMap,[old, new],ratio, FIND_DIST);
                     found_objects = cat(1, found_objects, newly_found_objects);
 
                 end
@@ -158,7 +157,7 @@ function runUVAMsal(imagePath)
 %         gazeSequence(img, ROI, count);
 %         hold off
         % inhibition of return at ROI location
-        UAmap(ROI(1):ROI(3),ROI(2):ROI(4)) = ones(ROI(3)-ROI(1)+1,ROI(4)-ROI(2)+1) * -2;
+        salMap(ROI(1):ROI(3),ROI(2):ROI(4)) = ones(ROI(3)-ROI(1)+1,ROI(4)-ROI(2)+1) * -2;
         
         % update display of UA map
         figure(1)
