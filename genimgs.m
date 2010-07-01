@@ -1,15 +1,20 @@
+% script for generating images
+% takes a background and adds a random number of random objects with random location, scale and orientation
+
+NUM_IMAGES = 100;
+
 clear
 bcks = dir('backgrounds');
 objs = dir('objects');
 
-for imm = 1:100
+for imm = 1:NUM_IMAGES
     bckno = randi([3,length(bcks)]);
 
     img = im2double(imread(['backgrounds/' bcks(bckno).name]));
     
-    %numo = randi([3,5]);
+    numo = randi([3,5]);
 
-    for os = 1:4
+    for os = 1:numo
 
         obno = randi([3,length(objs)]);
 

@@ -1,3 +1,6 @@
+%% add_ellipse(map,weight,y,x,ysize,xsize,rot)
+% add an ellipse to at location x,y with size xsize * ysize and rotation rot to map, weighted with weight
+
 function map = add_ellipse(map,weight,y,x,ysize,xsize,rot)
     N = max(xsize,ysize);
     cosdrot = cosd(rot);

@@ -10,7 +10,7 @@
 %       getFBmap()
      
 
-function runUVAMsal(imagePath)  
+function runUVAM(imagePath)  
 
     % set relevant parameters
 
@@ -79,39 +79,38 @@ function runUVAMsal(imagePath)
     imshow(img)
 
     % get descriptors from upper scale range
-    %[upper_octaves_frames upper_octaves_descs] = imagedescs.get_descriptors_scales(ROI_SCALES+1, 100);
+    [upper_octaves_frames upper_octaves_descs] = imagedescs.get_descriptors_scales(ROI_SCALES+1, 100);
 
-    %time = cputime;
+    time = cputime;
     % match descriptors against database
-    %[indices, dists, features] = matchAgainstDB(upper_octaves_descs, ERROR_UPPER_OCT);
-    %FFtime = cputime - time
-    %passed_keypoints = upper_octaves_frames(:,indices);
+    [indices, dists, features] = matchAgainstDB(upper_octaves_descs, ERROR_UPPER_OCT);
+    FFtime = cputime - time
+    passed_keypoints = upper_octaves_frames(:,indices);
     
     % show found descriptors on image
-    %show_descriptors(passed_keypoints, dists,'k');
+    show_descriptors(passed_keypoints, dists,'k');
     
     % estimate object orientation, location and size from keypoints
-    %objects = estimate_objects(features,passed_keypoints, dists);
+    objects = estimate_objects(features,passed_keypoints, dists);
     
     % compute ffMap (needs to be improved)
     %ffmap = mark_obj(imgr,objects,FIND_DIST);
-    %FFfmap = getFFfmap(objects, size(salMap),ratio);
+    FFfmap = getFFfmap(objects, size(salMap),ratio);
 
-    %UAmap = FFfmap./2 + salMap;
+    UAmap = FFfmap./2 + salMap;
 
     maxi = 1;
     count = 0;
     time = cputime;
     found_objects = [];
-    objects = [];
-    [numbRegions, x, y, blockCoordinates] = possibleROIs(salMap, 5);
+    [numbRegions, x, y, blockCoordinates] = possibleROIs(UAmap, 5);
      
     while(maxi >= MAXI_LIM)
         count = count + 1;
         
         
         % find ROI on saliency map (change to UA map)
-        [ROI maxi] = findROI(numbRegions, x, y, blockCoordinates, salMap);
+        [ROI maxi] = findROI(numbRegions, x, y, blockCoordinates, UAmap);
         ROI_big(1) = ROI(1,1) * ratio(1);
         ROI_big(3) = ROI(1,3) * ratio(1);
         ROI_big(2) = ROI(1,2) * ratio(2);
@@ -124,7 +123,7 @@ function runUVAMsal(imagePath)
         
         
         % get descriptors from lower scale range inside current ROI
-        [lower_octaves_frames lower_octaves_descs] = imagedescs.get_descriptors(ROI_big, 0, 1000);
+        [lower_octaves_frames lower_octaves_descs] = imagedescs.get_descriptors(ROI_big, 0, ROI_SCALES);
         % match descriptors against database
         [indices, dists, features] = matchAgainstDB(lower_octaves_descs, ERROR_LOWER_OCT);
         passed_keypoints = lower_octaves_frames(:,indices);
@@ -133,21 +132,23 @@ function runUVAMsal(imagePath)
         new_objects = estimate_objects(features,passed_keypoints, dists);
         % add new objects
        
-        if isempty(objects) && ~isempty(new_objects)
-            objects = new_objects;
-        elseif ~isempty(new_objects)
+        interesting_objs = [];
+        if ~isempty(new_objects)
             n_o_labels = [new_objects.label];
             while ~isempty(n_o_labels)
                 old = objects([objects.label] == n_o_labels(1));
                 if size(old) > 0
                     new = new_objects([new_objects.label] == n_o_labels(1));
-                    [salMap newly_found_objects] = getFBfmapsal(UAmap,[old, new],ratio);
+                    [UAmap newly_found_objects] = getFBfmap(UAmap,[old, new],ratio);
                     found_objects = cat(1, found_objects, newly_found_objects);
+                    
                 end
                 n_o_labels(n_o_labels == n_o_labels(1)) = [];
             end
         end
         
+        [UAmap newly_found_objects] = getFBfmap(UAmap,interesting_objs,ratio);
+        found_objects = cat(1, found_objects, newly_found_objects);
         
         objects = [objects,new_objects];
         
@@ -161,8 +162,8 @@ function runUVAMsal(imagePath)
         % update display of UA map
         figure(1)
         set(gcf,'CurrentAxes',hFamiliarity);
-        imagesc(salMap);
-        
+        imagesc(UAmap);
+        maxi
     end
     FBtime = cputime - time
     figure(1)

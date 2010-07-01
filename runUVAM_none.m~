@@ -10,7 +10,7 @@
 %       getFBmap()
      
 
-function runUVAMsal(imagePath)  
+function runUVAM(imagePath)  
 
     % set relevant parameters
 
@@ -79,39 +79,38 @@ function runUVAMsal(imagePath)
     imshow(img)
 
     % get descriptors from upper scale range
-    %[upper_octaves_frames upper_octaves_descs] = imagedescs.get_descriptors_scales(ROI_SCALES+1, 100);
+    [upper_octaves_frames upper_octaves_descs] = imagedescs.get_descriptors_scales(0, 100);
 
-    %time = cputime;
+    time = cputime;
     % match descriptors against database
-    %[indices, dists, features] = matchAgainstDB(upper_octaves_descs, ERROR_UPPER_OCT);
-    %FFtime = cputime - time
-    %passed_keypoints = upper_octaves_frames(:,indices);
+    [indices, dists, features] = matchAgainstDB(upper_octaves_descs, ERROR_UPPER_OCT);
+    FFtime = cputime - time
+    passed_keypoints = upper_octaves_frames(:,indices);
     
     % show found descriptors on image
-    %show_descriptors(passed_keypoints, dists,'k');
+    show_descriptors(passed_keypoints, dists,'k');
     
     % estimate object orientation, location and size from keypoints
-    %objects = estimate_objects(features,passed_keypoints, dists);
-    
+    objects = estimate_objects(features,passed_keypoints, dists);
+    found_objects = findobjs([old, new]);
     % compute ffMap (needs to be improved)
     %ffmap = mark_obj(imgr,objects,FIND_DIST);
-    %FFfmap = getFFfmap(objects, size(salMap),ratio);
+    FFfmap = getFFfmap(objects, size(salMap),ratio);
 
-    %UAmap = FFfmap./2 + salMap;
+    UAmap = FFfmap./2 + salMap;
 
     maxi = 1;
     count = 0;
     time = cputime;
     found_objects = [];
-    objects = [];
-    [numbRegions, x, y, blockCoordinates] = possibleROIs(salMap, 5);
+    [numbRegions, x, y, blockCoordinates] = possibleROIs(UAmap, 5);
      
     while(maxi >= MAXI_LIM)
         count = count + 1;
         
         
         % find ROI on saliency map (change to UA map)
-        [ROI maxi] = findROI(numbRegions, x, y, blockCoordinates, salMap);
+        [ROI maxi] = findROI(numbRegions, x, y, blockCoordinates, UAmap);
         ROI_big(1) = ROI(1,1) * ratio(1);
         ROI_big(3) = ROI(1,3) * ratio(1);
         ROI_big(2) = ROI(1,2) * ratio(2);
@@ -124,7 +123,7 @@ function runUVAMsal(imagePath)
         
         
         % get descriptors from lower scale range inside current ROI
-        [lower_octaves_frames lower_octaves_descs] = imagedescs.get_descriptors(ROI_big, 0, 1000);
+        [lower_octaves_frames lower_octaves_descs] = imagedescs.get_descriptors(ROI_big, 0, ROI_SCALES);
         % match descriptors against database
         [indices, dists, features] = matchAgainstDB(lower_octaves_descs, ERROR_LOWER_OCT);
         passed_keypoints = lower_octaves_frames(:,indices);
@@ -133,23 +132,31 @@ function runUVAMsal(imagePath)
         new_objects = estimate_objects(features,passed_keypoints, dists);
         % add new objects
        
-        if isempty(objects) && ~isempty(new_objects)
-            objects = new_objects;
-        elseif ~isempty(new_objects)
+        if ~isempty(new_objects)
             n_o_labels = [new_objects.label];
             while ~isempty(n_o_labels)
-                old = objects([objects.label] == n_o_labels(1));
+                oldis = find([objects.label] == n_o_labels(1));
+                old = objects(oldis);
                 if size(old) > 0
-                    new = new_objects([new_objects.label] == n_o_labels(1));
-                    [salMap newly_found_objects] = getFBfmapsal(UAmap,[old, new],ratio);
-                    found_objects = cat(1, found_objects, newly_found_objects);
+                    newis = find([new_objects.label] == n_o_labels(1));
+                    new = new_objects(newis);
+                    [UAmap newly_found_objects ois] = getFBfmap(UAmap,[old, new],ratio);
+                    if ~isempty(newly_found_objects)
+                        found_objects = cat(1, found_objects, newly_found_objects(1));
+                        for i = 1:length(newly_found_objects)
+                            nis = newis(ois(ois > length(oldis)));
+                            olis = oldis(ois(ois <= length(oldis)));
+                            objects(olis) = [];
+                            new_objects(nis) = [];
+                        end
+                    end
                 end
                 n_o_labels(n_o_labels == n_o_labels(1)) = [];
             end
         end
-        
-        
+       
         objects = [objects,new_objects];
+
         
 %         figure(3)
 %         hold on
@@ -161,22 +168,24 @@ function runUVAMsal(imagePath)
         % update display of UA map
         figure(1)
         set(gcf,'CurrentAxes',hFamiliarity);
-        imagesc(salMap);
-        
+        imagesc(UAmap);
     end
     FBtime = cputime - time
     figure(1)
     
-    
     % display found objects
     i = 0;
+    done = [];
     for obj = found_objects'
-       axes('position',[0.05+0.1*i 0.9 0.05 0.05]);
-       imshow(['../coil-100/obj' num2str(obj.label) '__0.png'])
-       title(['Object No. ' num2str(obj.label)])
-       annotation('arrow',[0.075+0.1*i, 0.05 + 0.6*min(1,max(0,obj.loc(1)/size(img,2)))], [0.9, min(1,max(0,0.85-0.8*obj.loc(2)/size(img,1)))])
-       annotation('ellipse',[min(1,max(0,0.6*obj.loc(1)/size(img,2))), min(1,max(0,0.85-0.8*obj.loc(2)/size(img,1)-0.8*obj.ySize/size(img,1))), 2*0.6*obj.xSize/size(img,2), 2*0.8*obj.ySize/size(img,1)],'EdgeColor','y','LineWidth',1)
-       i = i+1;
+       if sum(done == obj.label) == 0
+           axes('position',[0.05+0.1*i 0.9 0.05 0.05]);
+           imshow(['../coil-100/obj' num2str(obj.label) '__0.png'])
+           title(['Object No. ' num2str(obj.label)])
+           annotation('arrow',[0.075+0.1*i, 0.05 + 0.6*min(1,max(0,obj.loc(1)/size(img,2)))], [0.9, min(1,max(0,0.85-0.8*obj.loc(2)/size(img,1)))])
+           annotation('ellipse',[min(1,max(0,0.6*obj.loc(1)/size(img,2))), min(1,max(0,0.85-0.8*obj.loc(2)/size(img,1)-0.8*obj.ySize/size(img,1))), 2*0.6*obj.xSize/size(img,2), 2*0.8*obj.ySize/size(img,1)],'EdgeColor','y','LineWidth',1)
+           i = i+1;
+           done(end+1) = obj.label;
+       end
     end
  end
 
