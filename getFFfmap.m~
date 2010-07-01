@@ -1,8 +1,0 @@
-function map = getFFfmap(objects,res)
-    sigma_k = 0.25;
-    map = zeros(res);
-    for object = objects
-        map = add_ellipse(map,exp(-object.dist^2 *8),object.loc(1),object.loc(2),object.xSize,object.ySize,0);
-    end
-    map = map./max(map(:));
-end
