@@ -4,7 +4,7 @@
 %       ROI:  vector with upper-left and lower-rigth coordinates of 
 %             the region with the highest mean value [rowUL colUL rowLR colLR]
 
-function [ROI, maxi] = findROI(numbRegions, x, y, blockCoordinates, map)
+function [ROI, ROI_big, maxi] = findROI(numbRegions, x, y, blockCoordinates, map, ratio)
 
 % compute mean within each region
 meanVal = zeros(numbRegions,1);
@@ -22,3 +22,8 @@ end
 maxi = max(meanVal);
 % return ROI 
 ROI = blockCoordinates(meanVal == maxi,:);
+
+ROI_big(1) = round((ROI(1,1)) * ratio(1));
+ROI_big(3) = round((ROI(1,3)+1) * ratio(1))-1;
+ROI_big(2) = round((ROI(1,2)) * ratio(2));
+ROI_big(4) = round((ROI(1,4)+1) * ratio(2))-1;

@@ -17,17 +17,17 @@ function runUVAMsal(imagePath)
     ERROR_UPPER_OCT = 2;  % threshold for detecting keypoint in upper octaves
     ERROR_LOWER_OCT = 2; % threshold for detecting keypoint in lower octaves
     ROI_SCALES      = 3;    % scales used within ROIs go from 0 to ROI_SCALES
-    ROI_SIZE        = 4;   % size of a ROI in pixels
-    MAXI_LIM        = 0.01;  % threshold of stopping for looking for next ROI
+    ROI_SIZE        = 32;   % size of a ROI in pixels
+    MAXI_LIM        = 0.2;  % threshold of stopping for looking for next ROI
     FIND_DIST       = 0.05;  % if matching distance is <= FIND_DIST, object is marked as found
-    MAP_SIZE        = [576, 768];
+    MAP_SIZE        = [100,100];
     
 
     close all
     clc
 
     init % load object database
-    run('vlfeat/toolbox/vl_setup.m'); % init vlfeat
+    %run('vlfeat/toolbox/vl_setup.m'); % init vlfeat
 
     % setup figure
     figure(1); clf;
@@ -66,7 +66,7 @@ function runUVAMsal(imagePath)
     image_size(1) = size(img,1);
     image_size(2) = size(img,2);
 
-    ratio = image_size./MAP_SIZE
+    ratio = image_size./MAP_SIZE;
     
     % SIFT image / get image descriptors
     time = cputime;
@@ -133,7 +133,6 @@ function runUVAMsal(imagePath)
         new_objects = estimate_objects(features,passed_keypoints, dists);
         % add new objects
        
-        interesting_objs = [];
         if isempty(objects) && ~isempty(new_objects)
             objects = new_objects;
         elseif ~isempty(new_objects)
@@ -144,7 +143,6 @@ function runUVAMsal(imagePath)
                     new = new_objects([new_objects.label] == n_o_labels(1));
                     [salMap newly_found_objects] = getFBfmapsal(UAmap,[old, new],ratio);
                     found_objects = cat(1, found_objects, newly_found_objects);
-
                 end
                 n_o_labels(n_o_labels == n_o_labels(1)) = [];
             end

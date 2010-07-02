@@ -1,5 +1,7 @@
 for i = raus
-    
+    descriptors(:,[features.object] == i) = [];
+    features(:,[features.object] == i) = [];
+end
 
 
 % summe = zeros(1,100)

@@ -1,0 +1,2 @@
+To analyze an image, run 'runUVAM(image_file)', image_file being the name of the image file.
+Have a look at runUVAM.m to change some parameters.

@@ -1,0 +1,16 @@
+1. make
+2. make install
+
+(Read this if you are interested in using siftfast.m for matlab on Linux. When compiling a matlab mex file,  you might get a message saying the gcc version is too high. If so, matlab will have a hard time locating the correct libstdc++.so file. In this case, go into MATLAB-FOLDER/sys/os/glnx86
+
+and make libgcc_s and libstdc++ point to the /usr/lib versions
+sudo mv libgcc_s.so.1 libgcc_s.so.1.back
+sudo ln -s /lib/libgcc_s.so.1 libgcc_s.so.1
+sudo rm libstdc++.so.6 (this was already a symbolic link)
+sudo ln -s /usr/lib/libstdc++.so.6.0.9 libstdc++.so.6
+)
+
+3. in matlab 
+mex -lsiftfast siftmex.cpp
+
+cputime, siftmex(img), cputime

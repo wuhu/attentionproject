@@ -1,3 +1,4 @@
+% add an ellipse with an asolute value
 function map = add_ellipse_abs(map,value,y,x,ysize,xsize,rot)
     N = max(xsize,ysize);
     cosdrot = cosd(rot);

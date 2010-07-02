@@ -1,3 +1,5 @@
+% script for creating a descriptor database for the COIL-100 objects
+
 clear
 descriptors = zeros(128,0);
 features = struct([]);

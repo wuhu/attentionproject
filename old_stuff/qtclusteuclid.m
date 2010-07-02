@@ -1,4 +1,4 @@
-function idx=qtcluster(objects,d,D)
+function idx=qtcluster(G,d,D)
 % QT clustering algorithm as described in:
 %
 % Heyer, L. J., Kruglyak, S., Yooseph, S. (1999). Exploring expression
@@ -23,7 +23,7 @@ function idx=qtcluster(objects,d,D)
 % January 20th, 2009
 % Montague Laboratory
     
-    n=length(objects);
+    n=size(G,1);
     if n<=1
         idx=ones(n,1);
         return;
@@ -33,7 +33,7 @@ function idx=qtcluster(objects,d,D)
             for i = 1:size(objects, 1)
                 for j = 1:size(objects, 1)
                     delta_size = abs( (objects(i).xSize + objects(i).ySize) / 2 - (objects(j).xSize + objects(j).ySize) / 2 );
-                    delta_or = 0; %abs( objects(i).or - objects(j).or );
+                    delta_or = abs( objects(i).or - objects(j).or );
                     size_avg = ( (objects(i).xSize + objects(i).ySize) / 2 + (objects(j).xSize + objects(j).ySize) / 2 ) / 2;
                     delta_xy = sqrt( (objects(i).loc(1) - objects(j).loc(1))^2 + (objects(i).loc(1) - objects(j).loc(2))^2 );
                     dist_value = delta_xy/size_avg + delta_size/size_avg + delta_or/pi;
@@ -56,7 +56,7 @@ function idx=qtcluster(objects,d,D)
                 jdiam(pidx)=max(D(pts(pidx),A));
             end
             [minjdiam,pidx]=min(jdiam);j=pts(pidx);
-            if minjdiam < inf && (sum(jdiam==minjdiam)>1)
+            if sum(jdiam==minjdiam)>1
                 dbstack;keyboard;
             end
             
@@ -79,7 +79,7 @@ function idx=qtcluster(objects,d,D)
 
     idx=ones(n,1);
     GmC=1:n;GmC(C)=[];
-    idx(GmC)=qtcluster(objects(GmC),d,D(GmC,GmC))+1;
+    idx(GmC)=qtcluster(G(GmC,:),d,D(GmC,GmC))+1;
     
 function d=diam(G,clust)
 % http://thesaurus.maths.org/mmkb/entry.html?action=entryByConcept&id=3279

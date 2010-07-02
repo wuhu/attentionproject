@@ -12,172 +12,209 @@
 
 function runUVAM(imagePath)  
 
-    % set relevant parameters
+    %% relevant parameters
 
-    ERROR_UPPER_OCT = 2;  % threshold for detecting keypoint in upper octaves
-    ERROR_LOWER_OCT = 2; % threshold for detecting keypoint in lower octaves
-    ROI_SCALES      = 3;    % scales used within ROIs go from 0 to ROI_SCALES
-    ROI_SIZE        = 32;   % size of a ROI in pixels
-    MAXI_LIM        = 0.2;  % threshold of stopping for looking for next ROI
-    FIND_DIST       = 0.05;  % if matching distance is <= FIND_DIST, object is marked as found
-    MAP_SIZE        = [100,100];
+    ERROR_UPPER_OCT = 200;  % threshold for detecting keypoint in upper octaves (not used in paper)
+    ERROR_LOWER_OCT = 200; % threshold for detecting keypoint in lower octaves (not used in paper)
+    ROI_SCALES      = 3;    % scales used within ROIs go from 0 to ROI_SCALES (value in paper: 3 (lowest octave, assuming that an octave consists of three scales))
+    ROI_SIZE        = 4;   % size of a ROI in pixels (value in paper: 32)
+    MAXI_LIM        = 0;  % threshold for UA-map value in ROI at which feedback loop will be stopped (not used in paper)
+    ITERATION_LIM   = 50; % number of maximum iterations of the feedback loop (not used in paper)
+    QT              = 0.5; % quality threshold for QT-clustering (value in paper: 0.75)
+    SIGMA_K         = 0.25; % sigma parameter for update of feed-forward familiarity map (value in paper: 0.25)
+    SIGMA_C         = 0.25; % sigma parameter for update of feed-back familiarity map (value in paper: ??)
+    MAP_SIZE        = [100,100]; % size of attention maps (with a sufficient size, this value should have neglectable influence on the results)
+    SAL_WEIGHT      = 0.5; % weight of the saliency map in comparison to the familiarity map (value in paper: 0.5 (implicit, since they do not use weighting))
+    USE_SALIENCY    = 1; % use saliency map?
+    USE_FAM         = 1; % use familiarity map?
+    DISPLAY         = 1; % graphical output?
+    VL_FEAT_PATH    = '../vlfeat-0.9.8/toolbox/vl_setup.m';
+    SALIENCY_PATH   = '/home/hu/UNI/SIFT/SaliencyToolbox';
+
+    %% initialization
     
-
     close all
     clc
 
-    init % load object database
-    %run('vlfeat/toolbox/vl_setup.m'); % init vlfeat
-
-    % setup figure
-    figure(1); clf;
-    set(gcf,'DefaultAxesTickLength',[0.005 0.01]);
-    set(gcf,'DefaultAxesTickDir','out')
-    set(gcf,'DefaultAxesbox','off')
-    set(gcf,'DefaultAxesLayer','top')
-    set(gcf,'DefaultAxesFontSize',10)
-    xSize = 25;
-    ySize = 15;
-    xLeft = (21-xSize)/2;
-    yTop = (30-ySize)/2;
-    set(gcf,'PaperUnits','centimeters','PaperPosition',[xLeft yTop xSize ySize],'Position',[1000-xSize*30 700-ySize*30 xSize*40 ySize*40])
-
-    hImage = axes('position',[0.05 0.05 0.6 0.8]);
-    hSaliency = axes('position',[0.7 0.05 0.25 0.425]);
-    hFamiliarity = axes('position',[0.7 0.55 0.25 0.425]);
-
-    % set path for saliency toolboy
-    saliencyToolboxPath = '/home/hu/UNI/SIFT/SaliencyToolbox';
-    addpath(genpath(saliencyToolboxPath));
+    % initialize vlfeat (for nearest neighbor matching)
+    run(VL_FEAT_PATH); 
+    % initialize saliency toolbox
+    addpath(genpath(SALIENCY_PATH));
+    
+    % initialize figure (returns axis handles)
+    if DISPLAY
+        [hImage hSaliency hFamiliarity] = init_figure;
+    end
+    
+    % load object database
+    load_db
 
     % get input image
     img = imread(imagePath);
-
-    % get and display saliency map
-    time = cputime;
-    salMap = getSalMap(img, MAP_SIZE);
-    salTime = cputime - time
-    set(gcf,'CurrentAxes',hSaliency);
-    image(salMap)
-    %colormap(gray(255))
-    salMap = salMap/max(salMap(:));
     
-    image_size = zeros(1,2);
-    image_size(1) = size(img,1);
-    image_size(2) = size(img,2);
-
+    % display image
+    if DISPLAY
+        set(gcf,'CurrentAxes',hImage);
+        imshow(img) 
+    end
+    
+    % compute ratio between map and image (to switch between sizes)
+    [image_size(1) image_size(2) ~] = size(img);
     ratio = image_size./MAP_SIZE;
-    
+
+    %% saliency map
+    if USE_SALIENCY
+        % get and display saliency map
+        time = cputime; % TIME
+        salMap = getSalMap(img, MAP_SIZE);
+        salMap = salMap/max(salMap(:));
+        salTime = cputime - time % TIME
+
+        % display
+        if DISPLAY
+            set(gcf,'CurrentAxes',hSaliency);
+            imagesc(salMap)
+        end
+    end
+
+    %% SIFT analysis
     % SIFT image / get image descriptors
-    time = cputime;
+    time = cputime; % TIME
     imagedescs = sift(img);
-    siftTime = cputime - time
-    % get familiarity map
-    % famMap = getFFmap(imagedescs);
+    siftTime = cputime - time % TIME
 
-    set(gcf,'CurrentAxes',hImage);
-    imshow(img)
+    %% feed-forward familiarity map
+    if USE_FAM
+        % get descriptors from upper scale range
+        [upper_octaves_frames upper_octaves_descs] = imagedescs.get_descriptors_scales(ROI_SCALES+1, 100);
 
-    % get descriptors from upper scale range
-    [upper_octaves_frames upper_octaves_descs] = imagedescs.get_descriptors_scales(ROI_SCALES+1, 100);
+        time = cputime;
+        % match descriptors against database
+        [indices, dists, features] = matchAgainstDB(upper_octaves_descs, ERROR_UPPER_OCT);
+        FFtime = cputime - time
+        passed_keypoints = upper_octaves_frames(:,indices);
 
-    time = cputime;
-    % match descriptors against database
-    [indices, dists, features] = matchAgainstDB(upper_octaves_descs, ERROR_UPPER_OCT);
-    FFtime = cputime - time
-    passed_keypoints = upper_octaves_frames(:,indices);
+        % show found descriptors on image
+        if DISPLAY
+            show_descriptors(passed_keypoints, dists,'k');
+        end
+
+        % estimate object orientation, location and size from keypoints (for
+        % FF-map generation and later clustering
+        objects = estimate_objects(features,passed_keypoints, dists);
+
+        % compute feed-forward familiarity map
+        FFfmap = getFFfmap(objects, MAP_SIZE, SIGMA_K, ratio);
+    else
+        objects = [];
+    end
+
+    %% main feedback loop    
     
-    % show found descriptors on image
-    show_descriptors(passed_keypoints, dists,'k');
-    
-    % estimate object orientation, location and size from keypoints
-    objects = estimate_objects(features,passed_keypoints, dists);
-    
-    % compute ffMap (needs to be improved)
-    %ffmap = mark_obj(imgr,objects,FIND_DIST);
-    FFfmap = getFFfmap(objects, size(salMap),ratio);
-
-    UAmap = FFfmap./2 + salMap;
+    % create unified attention map (weighted sum of saliency map and familiarity map)
+    if USE_SALIENCY && USE_FAM
+        UAmap = (1-SAL_WEIGHT)*FFfmap + (SAL_WEIGHT)*salMap;
+    elseif USE_FAM
+        UAmap = FFfmap;
+    else
+        UAmap = salMap;
+    end
 
     maxi = 1;
-    count = 0;
+    it = 0;
     time = cputime;
     found_objects = [];
-    [numbRegions, x, y, blockCoordinates] = possibleROIs(UAmap, 5);
-     
-    while(maxi >= MAXI_LIM)
-        count = count + 1;
+    [numbRegions, x, y, blockCoordinates] = possibleROIs(UAmap, ROI_SIZE);
+
+    while(maxi >= MAXI_LIM && it < ITERATION_LIM)
+        it = it + 1;
         
+        % find ROI on UA map
+        [ROI ROI_big maxi] = findROI(numbRegions, x, y, blockCoordinates, UAmap, ratio);
+
+        % display ROI on image
+        if DISPLAY
+            set(gcf,'CurrentAxes',hImage);
+            hold on
+            rectangle('Position',[ROI_big(2),ROI_big(1),ROI_big(4)-ROI_big(2)+1,ROI_big(3)-ROI_big(1)+1]);
+            hold off
+        end
         
-        % find ROI on saliency map (change to UA map)
-        [ROI maxi] = findROI(numbRegions, x, y, blockCoordinates, UAmap);
-        ROI_big(1) = ROI(1,1) * ratio(1);
-        ROI_big(3) = ROI(1,3) * ratio(1);
-        ROI_big(2) = ROI(1,2) * ratio(2);
-        ROI_big(4) = ROI(1,4) * ratio(2);
-        % display ROI on figure
-        set(gcf,'CurrentAxes',hImage);
-        hold on
-        rectangle('Position',[ROI_big(2),ROI_big(1),ROI_big(4)-ROI_big(2)+1,ROI_big(3)-ROI_big(1)+1]);
-        hold off
+        if USE_FAM
+            % get descriptors from lower scale range inside current ROI
+            [lower_octaves_frames lower_octaves_descs] = imagedescs.get_descriptors(ROI_big, 0, ROI_SCALES);
+        else
+            [lower_octaves_frames lower_octaves_descs] = imagedescs.get_descriptors(ROI_big, 0, 9999);
+        end
         
-        
-        % get descriptors from lower scale range inside current ROI
-        [lower_octaves_frames lower_octaves_descs] = imagedescs.get_descriptors(ROI_big, 0, ROI_SCALES);
         % match descriptors against database
         [indices, dists, features] = matchAgainstDB(lower_octaves_descs, ERROR_LOWER_OCT);
         passed_keypoints = lower_octaves_frames(:,indices);
-        show_descriptors(passed_keypoints,dists,'r');
+        if DISPLAY
+            show_descriptors(passed_keypoints,dists,'r');
+        end
         % estimate pose of new objects
-        new_objects = estimate_objects(features,passed_keypoints, dists);
+        new_objects = estimate_objects(features,passed_keypoints, dists); % (not necessary for all, should be changed for performance)
+        if isempty(objects)
+            objects = new_objects
+            new_objects = [];
+        end
         % add new objects
        
-        interesting_objs = [];
-        if ~isempty(new_objects)
+        if ~isempty(new_objects) % if we have found new descriptors ..
             n_o_labels = [new_objects.label];
             while ~isempty(n_o_labels)
-                old = objects([objects.label] == n_o_labels(1));
+                oldis = find([objects.label] == n_o_labels(1)); % .. look if we had found descriptors before, that seem to belong to the same object as what we found now ..
+                old = objects(oldis);
                 if size(old) > 0
-                    new = new_objects([new_objects.label] == n_o_labels(1));
-                    [UAmap newly_found_objects] = getFBfmap(UAmap,[old, new],ratio);
-                    found_objects = cat(1, found_objects, newly_found_objects);
-                    
+                    newis = find([new_objects.label] == n_o_labels(1));
+                    new = new_objects(newis);
+
+                    [UAmap newly_found_objects ois] = getFBfmap(UAmap,[old, new],QT,SIGMA_C,ratio,USE_FAM); % .. and cluster them (i.e. update the familiarity map and find new objects)
+
+                    if ~isempty(newly_found_objects) % if we foud something new ..
+                        found_objects = cat(1, found_objects, newly_found_objects(1)); % .. remember that ..
+                        for i = 1:length(newly_found_objects) % .. and exclude the corresponding descriptors from future clustering
+                            nis = newis(ois(ois > length(oldis)));
+                            olis = oldis(ois(ois <= length(oldis)));
+                            objects(olis) = [];
+                            new_objects(nis) = [];
+                        end
+                    end
                 end
                 n_o_labels(n_o_labels == n_o_labels(1)) = [];
             end
         end
         
-        [UAmap newly_found_objects] = getFBfmap(UAmap,interesting_objs,ratio);
-        found_objects = cat(1, found_objects, newly_found_objects);
-        
+        % remember newly found descriptors that were not conclusive
         objects = [objects,new_objects];
-        
-%         figure(3)
-%         hold on
-%         gazeSequence(img, ROI, count);
-%         hold off
-        % inhibition of return at ROI location
+
+        % inhibite return to ROI location by updating UAmap
         UAmap(ROI(1):ROI(3),ROI(2):ROI(4)) = ones(ROI(3)-ROI(1)+1,ROI(4)-ROI(2)+1) * -2;
         
         % update display of UA map
-        figure(1)
-        set(gcf,'CurrentAxes',hFamiliarity);
-        imagesc(UAmap);
-        maxi
+        if DISPLAY
+            set(gcf,'CurrentAxes',hFamiliarity);
+            imagesc(UAmap);
+        end
     end
     FBtime = cputime - time
-    figure(1)
+
     
-    
-    % display found objects
-    i = 0;
-    for obj = found_objects'
-       axes('position',[0.05+0.1*i 0.9 0.05 0.05]);
-       imshow(['../coil-100/obj' num2str(obj.label) '__0.png'])
-       title(['Object No. ' num2str(obj.label)])
-       annotation('arrow',[0.075+0.1*i, 0.05 + 0.6*min(1,max(0,obj.loc(1)/size(img,2)))], [0.9, min(1,max(0,0.85-0.8*obj.loc(2)/size(img,1)))])
-       annotation('ellipse',[min(1,max(0,0.6*obj.loc(1)/size(img,2))), min(1,max(0,0.85-0.8*obj.loc(2)/size(img,1)-0.8*obj.ySize/size(img,1))), 2*0.6*obj.xSize/size(img,2), 2*0.8*obj.ySize/size(img,1)],'EdgeColor','y','LineWidth',1)
-       i = i+1;
+    %% display found objects
+    if DISPLAY
+        i = 0;
+        done = [];
+        for obj = found_objects'
+           if sum(done == obj.label) == 0
+               axes('position',[0.05+0.1*i 0.9 0.05 0.05]);
+               imshow(['../coil-100/obj' num2str(obj.label) '__0.png'])
+               title(['Object No. ' num2str(obj.label)])
+               annotation('arrow',[0.075+0.1*i, 0.05 + 0.6*min(1,max(0,obj.loc(1)/size(img,2)))], [0.9, min(1,max(0,0.85-0.8*obj.loc(2)/size(img,1)))])
+               annotation('ellipse',[min(1,max(0,0.6*obj.loc(1)/size(img,2))), min(1,max(0,0.85-0.8*obj.loc(2)/size(img,1)-0.8*obj.ySize/size(img,1))), 2*0.6*obj.xSize/size(img,2), 2*0.8*obj.ySize/size(img,1)],'EdgeColor','y','LineWidth',1)
+               i = i+1;
+               done(end+1) = obj.label;
+           end
+        end
     end
  end
-
