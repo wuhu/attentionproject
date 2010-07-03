@@ -28,7 +28,7 @@ function runUVAM(imagePath)
     USE_SALIENCY    = 1; % use saliency map?
     USE_FAM         = 1; % use familiarity map?
     DISPLAY         = 1; % graphical output?
-    VL_FEAT_PATH    = '../vlfeat-0.9.8/toolbox/vl_setup.m';
+    VL_FEAT_PATH    = './vlfeat/toolbox/vl_setup.m';
     SALIENCY_PATH   = '/home/hu/UNI/SIFT/SaliencyToolbox';
 
     %% initialization
@@ -59,7 +59,7 @@ function runUVAM(imagePath)
     end
     
     % compute ratio between map and image (to switch between sizes)
-    [image_size(1) image_size(2) ~] = size(img);
+    [image_size(1) image_size(2) bla] = size(img);
     ratio = image_size./MAP_SIZE;
 
     %% saliency map

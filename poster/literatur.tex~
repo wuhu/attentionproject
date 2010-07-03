@@ -1,0 +1,18 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Literaturverzeichnis
+
+%\begin{übler Trick um die Orinalüberschrift zu unterdrücken}
+\vspace*{1cm}
+      \begin{center} \textbf{\Large References} \end{center}
+\vspace*{-4.5cm}
+%\end{übler Trick}
+
+\renewcommand{\baselinestretch}{1.05}\small\normalsize
+\begin{thebibliography}{9}
+\bibitem{lee2010} \textsc{S. Lee, K. Kim, J.-Y. Kim, M. Kim, H.-J. Yoo,} ``Familiarity based unified visual attention model for fast and robust object recognition'', \textsl{Pattern Recognition} 43, 2010.
+
+\bibitem{lowe2004} \textsc{D. G. Lowe,} ``Distinctive Image Features from Scale-Invariant Keypoints'', \textsl{nternational Journal of Computer Vision} 60, 2004.
+
+\bibitem{itti1998} textsc{L. Itti, C. Koch \& E. Niebur,}  ``A Model of Saliency-Based Visual Attention for Rapid Scene Analysis'',  \textsl{IEEE Transactions on Pattern Aanalysis and Machine Intelligence} 20, 1998.
+
+\end{thebibliography}

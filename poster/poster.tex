@@ -1,0 +1,142 @@
+\documentclass[a0,landscape]{a0poster}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Paket zum Erzeugen der Spalten
+\usepackage{multicol}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Eingabekodierung
+\usepackage[ansinew]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{ae} %wenn Ulaute nicht gehen
+
+%\newcommand{\changefont}[3]{\fontfamily{#1} \fontseries{#2} \fontshape{#3} \selectfont}
+
+\usepackage[ngerman]{babel}
+%\begin{übler Trick um die Orinalüberschrift zu unterdrücken}
+\addto{\captionsngerman}{\renewcommand*{\refname}{}} %Literaturüberschfit unterdrücken
+%\ende{übler Trick}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% für Farbe
+\usepackage{color} 
+\definecolor{darkgreen}{rgb}{0,0.5,0} 
+\definecolor{darkblue}{rgb}{0,0,0.5}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Mathepaket
+\usepackage{amsmath} 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Ist für Boxen (wie das hier benutzte Ovalbox) zuständig
+\usepackage{fancybox}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Graphikpaket, ermöglicht png, jpg und pdf bilder
+\usepackage{graphicx}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Seiteneinstellungen
+\renewcommand\baselinestretch{1.35}
+\parskip=0.5\baselineskip
+
+\parindent0mm %Einrücktiefe der ersten Zeile eines Absatzes
+\topmargin-28pt
+\marginparwidth0mm
+
+%Ränder rechts/links
+\oddsidemargin-13pt
+\evensidemargin-13pt
+\textwidth1130mm
+\textheight785mm
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Eigene Definitionen zur Erleichterung des Satzes
+\newcommand{\spaltenbreite}{15}   % Spaltenbreite für Bilder
+\newcommand{\bildbreite}{15cm}    % Einheitliche Bildbreite
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Box- und Spalteneinstellungen
+\setlength{\fboxrule}{3.25mm} %Definiert die Linienstärke für nachfolgende fbox- und framebox-Befehle
+\setlength{\fboxsep}{5mm} %Abstand zwischen Rahmen und Text bei den /fbox und /framebox Befehlen.
+\setlength{\columnsep}{15mm}     %Spaltenabstand
+\setlength{\columnseprule}{3pt}  %Balken zwischen Spalten {0pt}->keine Balken
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Einheitslänge für picture-Umgebungen
+%\setlength{\unitlength}{1.0cm}
+\unitlength1cm
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Grafikpfad, hier liegen alle Bilder
+%\graphicspath{{images/}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Zaehler fuer lineale. Sie werden gebraucht, wenn das Linealmacro
+% included wird
+\newcounter{skalax}
+\newcounter{skalay}
+
+
+\begin{document}
+
+\pagecolor[rgb]{1.0,1.0,0.82}
+%\changefont{cmr}{bx}{n}
+%\changefont{cmtt}{m}{n}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Kopf, hier funktioniert alles mit 'put'
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\framebox[1145mm]
+{
+  \begin{Bcenter} % centering for boxes
+
+  % Logos einbinden (per Hand plazieren)
+  \begin{picture}(0,0)
+    \put(44.8 , -8.0){\includegraphics[height=80mm]{tu.jpg}}
+    \put(46.9 ,-9.2){\LARGE \textsf{\textbf{TU Berlin}}}
+    \put(-50.0, -8.0){\includegraphics[height=80mm]{bccn.pdf}}
+    \put(-56.0,-9.2){\large \textsf{\textbf{Bernstein Center for Computational Neuroscience}}}
+  \end{picture}
+
+  \\[0.02\textheight]
+  \textbf{{\huge Implementation and Evaluation of the}}\\[0.006\textheight]
+  {\huge \textrm{\textbf{Unified Visual Attention Model (UVAM)}}}\\[0.004\textheight]
+  \\[0.004\textheight]
+  {\LARGE \textbf{Alexander Schlegel, Rafael Schultze-Kraft}}\\[0.004\textheight]
+  {\today}
+
+\end{Bcenter}
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Einstellung des Eckenradius' der ovalen Boxen (\Ovalbox)
+\cornersize*{80mm}
+
+
+\linethickness{0.1mm}
+\setlength{\fboxrule}{2.25mm}
+
+    \vspace*{0.018\textheight}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+% neuer Kasten
+%\Ovalbox
+%{
+  \parbox{\textwidth}{
+    \begin{multicols}{4}
+      
+      \input{intro.tex}
+      \input{methods}
+      \input{results}
+      \input{conclusion}
+      \input{literatur}
+     
+    \end{multicols}
+  }
+%}
+
+
+
+\end{document}
