@@ -26,7 +26,7 @@ function runUVAM(imagePath)
     MAP_SIZE        = [100,100]; % size of attention maps (with a sufficient size, this value should have neglectable influence on the results)
     SAL_WEIGHT      = 0.5; % weight of the saliency map in comparison to the familiarity map (value in paper: 0.5 (implicit, since they do not use weighting))
     USE_SALIENCY    = 1; % use saliency map?
-    USE_FAM         = 1; % use familiarity map?
+    USE_FAM         = 0; % use familiarity map?
     DISPLAY         = 1; % graphical output?
     VL_FEAT_PATH    = './vlfeat/toolbox/vl_setup.m';
     SALIENCY_PATH   = '/home/hu/UNI/SIFT/SaliencyToolbox';
