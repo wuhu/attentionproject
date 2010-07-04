@@ -17,16 +17,16 @@ function runUVAM(imagePath)
     ERROR_UPPER_OCT = 200;  % threshold for detecting keypoint in upper octaves (not used in paper)
     ERROR_LOWER_OCT = 200; % threshold for detecting keypoint in lower octaves (not used in paper)
     ROI_SCALES      = 3;    % scales used within ROIs go from 0 to ROI_SCALES (value in paper: 3 (lowest octave, assuming that an octave consists of three scales))
-    ROI_SIZE        = 4;   % size of a ROI in pixels (value in paper: 32)
+    ROI_SIZE        = 32;   % size of a ROI in pixels (value in paper: 32)
     MAXI_LIM        = 0;  % threshold for UA-map value in ROI at which feedback loop will be stopped (not used in paper)
     ITERATION_LIM   = 50; % number of maximum iterations of the feedback loop (not used in paper)
     QT              = 0.5; % quality threshold for QT-clustering (value in paper: 0.75)
     SIGMA_K         = 0.25; % sigma parameter for update of feed-forward familiarity map (value in paper: 0.25)
     SIGMA_C         = 0.25; % sigma parameter for update of feed-back familiarity map (value in paper: ??)
-    MAP_SIZE        = [100,100]; % size of attention maps (with a sufficient size, this value should have neglectable influence on the results)
+    MAP_SIZE        = [576,768]; % size of attention maps (with a sufficient size, this value should have neglectable influence on the results)
     SAL_WEIGHT      = 0.5; % weight of the saliency map in comparison to the familiarity map (value in paper: 0.5 (implicit, since they do not use weighting))
     USE_SALIENCY    = 1; % use saliency map?
-    USE_FAM         = 0; % use familiarity map?
+    USE_FAM         = 1; % use familiarity map?
     DISPLAY         = 1; % graphical output?
     VL_FEAT_PATH    = './vlfeat/toolbox/vl_setup.m';
     SALIENCY_PATH   = '/home/hu/UNI/SIFT/SaliencyToolbox';
@@ -96,6 +96,7 @@ function runUVAM(imagePath)
 
         % show found descriptors on image
         if DISPLAY
+            set(gcf, 'CurrentAxes', hImage)
             show_descriptors(passed_keypoints, dists,'k');
         end
 
